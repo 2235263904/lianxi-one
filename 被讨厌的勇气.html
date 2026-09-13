@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  《被讨厌的勇气》阿德勒心理学金句集
+  ----------------------------------------------------------------------------
+  基于 Templatemo Conquer（Bootstrap 3 原版视差单页模板）改编
+  · 固定顶部导航栏（滚动时透明度变化）
+  · 多段视差滚动 banner（background-attachment: fixed，Conquer 标志性效果）
+  · 点击导航平滑滚动 + 滚动监听高亮
+  · 金句卡片布局（桌面 2 列 / 移动端堆叠）+ 滚动淡入
+  · 全部外部资源走 CDN（Bootstrap 3.4.1 / jQuery 3.7.1 / Google Fonts），
+    保存后直接用浏览器打开即可运行
+  ============================================================================
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="《被讨厌的勇气》阿德勒心理学金句集——课题分离、自由与勇气、共同体感觉。基于 Templatemo Conquer 模板。">
+  <title>被讨厌的勇气｜阿德勒心理学金句集</title>
+
+  <!-- 淡入效果做渐进增强：仅当 JS 可用时才隐藏待淡入元素，防止 CDN 加载失败时内容不可见 -->
+  <script>document.documentElement.className += ' js';</script>
+
+  <!-- Bootstrap 3.4.1（CDN，自带 Glyphicons 图标） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css">
+  <!-- 思源宋体（文艺衬线；加载失败时自动回退系统宋体，不影响排版） -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       配色与全局
+       主色调：深灰 #383E4C / 浅米白 #F7F3EB
+       装饰色：低饱和蓝灰 #B9C4CE（卡片边框）、#8C9DAB（装饰竖线）
+       ============================================================ */
+    :root {
+      --dark:     #383E4C;  /* 主深灰（沿用 Conquer 模板的深蓝灰底色） */
+      --beige:    #F7F3EB;  /* 浅米白 */
+      --beige-2:  #FCFAF5;  /* 更浅的米白，交替区块用 */
+      --card-bg:  #FFFEFB;  /* 卡片底色 */
+      --line:     #B9C4CE;  /* 低饱和蓝灰卡片边框 */
+      --line-2:   #8C9DAB;  /* 低饱和蓝灰装饰竖线 */
+      --text:     #4B5260;  /* 正文灰 */
+      --title:    #3A4049;  /* 标题深灰 */
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", sans-serif;
+      background-color: var(--dark);   /* 深色区块（横幅/页脚）露出的底色 */
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    /* 中文衬线字体栈：金句专用，营造文艺阅读感 */
+    .serif {
+      font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", "宋体", serif;
+    }
+
+    /* ============================================================
+       1. 固定顶部导航栏（滚动时透明度变化）
+       ============================================================ */
+    .navbar-main {
+      border: none;
+      border-radius: 0;
+      margin-bottom: 0;
+      background-color: rgba(56, 62, 76, 0.22);   /* 页面顶部：半透明 */
+      -webkit-transition: background-color .4s ease, box-shadow .4s ease;
+      transition: background-color .4s ease, box-shadow .4s ease;
+    }
+    /* 滚动超过 40px 后加深底色并加投影（由 JS 添加 .scrolled） */
+    .navbar-main.scrolled {
+      background-color: rgba(56, 62, 76, 0.96);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+    }
+    .navbar-main .navbar-brand {
+      color: #FFFFFF;
+      font-weight: 600;
+      letter-spacing: 2px;
+    }
+    .navbar-main .navbar-brand:hover,
+    .navbar-main .navbar-brand:focus { color: #FFFFFF; opacity: .85; }
+    .navbar-main .navbar-nav > li > a {
+      color: #E8EAEE;
+      font-size: 14px;
+      letter-spacing: 1px;
+      -webkit-transition: background-color .3s ease, color .3s ease;
+      transition: background-color .3s ease, color .3s ease;
+    }
+    .navbar-main .navbar-nav > li > a:hover,
+    .navbar-main .navbar-nav > li > a:focus {
+      color: #FFFFFF;
+      background-color: rgba(255, 255, 255, .12);
+    }
+    .navbar-main .navbar-nav > li.active > a,
+    .navbar-main .navbar-nav > li.active > a:hover,
+    .navbar-main .navbar-nav > li.active > a:focus {
+      color: #FFFFFF;
+      background-color: rgba(255, 255, 255, .16);
+    }
+    .navbar-main .navbar-toggle { border-color: rgba(255, 255, 255, .4); }
+    .navbar-main .navbar-toggle .icon-bar { background-color: #E8EAEE; }
+    .navbar-main .navbar-toggle:hover,
+    .navbar-main .navbar-toggle:focus { background-color: rgba(255, 255, 255, .12); }
+
+    /* ============================================================
+       Conquer 标志性视差滚动（background-attachment: fixed）
+       ============================================================ */
+    .parallax {
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+
+    /* ============================================================
+       2. 首页封面（全屏视差大图）
+       ============================================================ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      background-image: url("https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1920&q=80"); /* 静谧云雾远山 */
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      -webkit-justify-content: center;
+      justify-content: center;
+      text-align: center;
+    }
+    /* 暗色遮罩：保证标题可读，同时让画面更沉稳 */
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: rgba(28, 32, 40, .5);
+    }
+    .hero .container { position: relative; z-index: 1; }
+
+    .hero-en {
+      color: #C7CDD6;
+      font-size: 13px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin: 0 0 16px;
+    }
+    .hero-title {
+      color: #FFFFFF;
+      font-size: 62px;
+      font-weight: 700;
+      letter-spacing: 10px;
+      margin: 0 0 20px;
+      text-shadow: 0 2px 24px rgba(0, 0, 0, .45);
+    }
+    .hero-subtitle {
+      color: #E4E7EB;
+      font-size: 18px;
+      letter-spacing: 5px;
+      margin: 0;
+      text-shadow: 0 1px 12px rgba(0, 0, 0, .4);
+    }
+
+    /* 首页向下滚动提示（Bootstrap 自带 Glyphicon 图标） */
+    .scroll-down {
+      position: absolute;
+      bottom: 26px;
+      left: 50%;
+      margin-left: -18px;
+      z-index: 2;
+      width: 36px;
+      height: 36px;
+      line-height: 34px;
+      border: 1px solid rgba(255, 255, 255, .55);
+      border-radius: 50%;
+      color: #FFFFFF;
+      font-size: 16px;
+      -webkit-animation: bounce 2s infinite;
+      animation: bounce 2s infinite;
+    }
+    .scroll-down:hover,
+    .scroll-down:focus {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, .15);
+      text-decoration: none;
+    }
+    @-webkit-keyframes bounce {
+      0%, 100% { -webkit-transform: translateY(0); transform: translateY(0); opacity: .9; }
+      50%      { -webkit-transform: translateY(8px); transform: translateY(8px); opacity: .55; }
+    }
+    @keyframes bounce {
+      0%, 100% { -webkit-transform: translateY(0); transform: translateY(0); opacity: .9; }
+      50%      { -webkit-transform: translateY(8px); transform: translateY(8px); opacity: .55; }
+    }
+
+    /* ============================================================
+       3. 金句区块（浅米白底 + 卡片式金句）
+       ============================================================ */
+    .quote-section { padding: 84px 0 70px; background-color: var(--beige); }
+    .quote-section.alt { background-color: var(--beige-2); }   /* 相邻区块交替底色 */
+
+    /* 区块标题 */
+    .section-head { margin-bottom: 56px; text-align: center; }
+    .section-title {
+      color: var(--title);
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      margin: 0 0 8px;
+    }
+    .section-subtitle {
+      color: #98A3AE;
+      font-size: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin: 0 0 18px;
+    }
+    .section-divider {
+      width: 56px;
+      height: 2px;
+      background: var(--line-2);
+      margin: 0 auto 20px;
+    }
+    .section-intro {
+      color: #6C7683;
+      font-size: 14px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* 金句卡片：左侧低饱和蓝灰装饰竖线 + 轻微阴影 */
+    .quote-card {
+      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--line-2);   /* 左侧装饰竖线 */
+      border-radius: 3px;
+      padding: 36px 38px 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 12px rgba(56, 62, 76, .08);   /* 轻微阴影 */
+      -webkit-transition: -webkit-transform .3s ease, box-shadow .3s ease;
+      transition: transform .3s ease, box-shadow .3s ease;
+    }
+    .quote-card:hover {
+      -webkit-transform: translateY(-4px);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 22px rgba(56, 62, 76, .14);
+    }
+    /* 右上角极浅蓝灰引号，纯装饰 */
+    .quote-mark {
+      position: absolute;
+      top: 8px;
+      right: 24px;
+      font-size: 64px;
+      line-height: 1;
+      color: #DEE5E9;
+      pointer-events: none;
+    }
+    .quote-text {
+      color: #414753;
+      font-size: 17px;
+      line-height: 2;
+      margin: 0;
+    }
+    /* 底部编号 + 细短线装饰 */
+    .quote-num {
+      margin-top: 18px;
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: #A4AEBA;
+    }
+    .quote-num::before {
+      content: "";
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: #C4CDD5;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    /* ============================================================
+       4. 视差分隔横幅（板块金句大标题）
+       ============================================================ */
+    .banner {
+      position: relative;
+      padding: 110px 0;
+      text-align: center;
+      color: #FFFFFF;
+    }
+    .banner::before {
+      content: "";
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: rgba(28, 32, 40, .5);   /* 暗色遮罩保证文字可读 */
+    }
+    .banner .container { position: relative; z-index: 1; }
+
+    .banner-quote {
+      font-size: 27px;
+      line-height: 2;
+      letter-spacing: 3px;
+      max-width: 780px;
+      margin: 0 auto 16px;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, .5);
+    }
+    .banner-source {
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: #D8DDE3;
+      margin: 0;
+    }
+    /* 横幅背景图（安静、治愈、偏暗调） */
+    .banner-freedom {
+      background-image: url("https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&fit=crop&w=1920&q=80"); /* 暗调海浪 */
+    }
+    .banner-community {
+      background-image: url("https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1920&q=80"); /* 星空下的篝火 */
+    }
+
+    /* ============================================================
+       5. 页脚
+       ============================================================ */
+    .footer {
+      background-color: var(--dark);
+      color: #9AA3AF;
+      text-align: center;
+      padding: 34px 15px;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+    .footer-quote-source {
+      color: #C3C9D2;
+      letter-spacing: 2px;
+      margin: 0;
+    }
+    .footer-meta {
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: #7C8492;
+    }
+
+    /* ============================================================
+       6. 淡入效果（滚动到视口内时由 JS 添加 .visible）
+       ============================================================ */
+    html.js .fade-in-up {
+      opacity: 0;
+      -webkit-transform: translateY(30px);
+      transform: translateY(30px);
+      -webkit-transition: opacity .8s ease, -webkit-transform .8s ease;
+      transition: opacity .8s ease, transform .8s ease;
+    }
+    html.js .fade-in-up.visible {
+      opacity: 1;
+      -webkit-transform: translateY(0);
+      transform: translateY(0);
+    }
+    /* 同一行两张卡片错峰入场 */
+    @media (min-width: 992px) {
+      .quote-row > .col-md-6:nth-child(2) .fade-in-up,
+      .quote-row > .col-md-6:nth-child(4) .fade-in-up {
+        -webkit-transition-delay: .18s;
+        transition-delay: .18s;
+      }
+    }
+
+    /* 首页标题加载淡入（纯 CSS 动画，配合 .d1/.d2/.d3 依次入场） */
+    html.js .hero-fade {
+      opacity: 0;
+      -webkit-animation: heroFadeIn 1.2s ease forwards;
+      animation: heroFadeIn 1.2s ease forwards;
+    }
+    html.js .hero-fade.d1 { -webkit-animation-delay: .2s;  animation-delay: .2s; }
+    html.js .hero-fade.d2 { -webkit-animation-delay: .6s;  animation-delay: .6s; }
+    html.js .hero-fade.d3 { -webkit-animation-delay: 1s;   animation-delay: 1s; }
+    @-webkit-keyframes heroFadeIn {
+      from { opacity: 0; -webkit-transform: translateY(26px); transform: translateY(26px); }
+      to   { opacity: 1; -webkit-transform: translateY(0);    transform: translateY(0); }
+    }
+    @keyframes heroFadeIn {
+      from { opacity: 0; -webkit-transform: translateY(26px); transform: translateY(26px); }
+      to   { opacity: 1; -webkit-transform: translateY(0);    transform: translateY(0); }
+    }
+
+    /* ============================================================
+       7. 响应式适配
+       ============================================================ */
+    @media (max-width: 991px) {
+      .quote-card { min-height: 0; }
+    }
+    @media (max-width: 767px) {
+      .hero-title { font-size: 34px; letter-spacing: 4px; }
+      .hero-subtitle { font-size: 14px; letter-spacing: 2px; }
+      .hero-en { font-size: 11px; letter-spacing: 4px; }
+      .quote-section { padding: 60px 0 44px; }
+      .section-title { font-size: 26px; letter-spacing: 4px; }
+      .banner { padding: 70px 0; }
+      .banner-quote { font-size: 18px; letter-spacing: 1px; }
+      /* 移动端折叠菜单加深底色，避免半透明底上文字不清晰 */
+      .navbar-main .navbar-collapse { background-color: rgba(56, 62, 76, .96); }
+      /* iOS 等移动端浏览器不支持 background-attachment: fixed，
+         退化为普通背景，避免背景错位、模糊（桌面端视差不受影响） */
+      .parallax { background-attachment: scroll; }
+    }
+    /* 桌面端：一行两张卡片等高等宽 */
+    @media (min-width: 992px) {
+      .quote-row { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
+      .quote-row > .col-md-6 { display: -webkit-flex; display: flex; }
+      .quote-row .quote-card {
+        width: 100%;
+        min-height: 200px;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex-direction: column;
+        flex-direction: column;
+        -webkit-justify-content: center;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ==================== 固定顶部导航栏 ==================== -->
+  <nav class="navbar navbar-default navbar-fixed-top navbar-main" id="mainNav">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- 移动端汉堡按钮 -->
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                data-target="#navMenu" aria-expanded="false">
+          <span class="sr-only">展开导航</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand serif" href="#section1">被讨厌的勇气</a>
+      </div>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="nav navbar-nav navbar-right">
+          <li data-nav="section1" class="active"><a href="#section1">首页</a></li>
+          <li data-nav="section2"><a href="#section2">课题分离</a></li>
+          <li data-nav="section3"><a href="#section3">自由与勇气</a></li>
+          <li data-nav="section4"><a href="#section4">共同体感觉</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==================== 板块0：首页封面（全屏视差大图） ==================== -->
+  <header id="section1" class="hero parallax">
+    <div class="container">
+      <p class="hero-en hero-fade d1">The Courage to Be Disliked</p>
+      <h1 class="hero-title serif hero-fade d2">《被讨厌的勇气》</h1>
+      <p class="hero-subtitle hero-fade d3">岸见一郎 / 古贺史健 · 阿德勒心理学</p>
+    </div>
+    <!-- 向下滚动提示 -->
+    <a class="scroll-down" href="#section2" aria-label="向下滚动">
+      <span class="glyphicon glyphicon-chevron-down"></span>
+    </a>
+  </header>
+
+  <!-- ==================== 板块1：课题分离 ==================== -->
+  <section id="section2" class="quote-section">
+    <div class="container">
+      <div class="section-head fade-in-up">
+        <h2 class="section-title serif">课题分离</h2>
+        <p class="section-subtitle">Separation of Tasks</p>
+        <div class="section-divider"></div>
+        <p class="section-intro">阿德勒心理学认为，人的一切烦恼皆来自人际关系。分清「这是谁的课题」，是走出烦恼的第一步。</p>
+      </div>
+
+      <div class="row quote-row">
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">一切烦恼皆源于人际关系。</p>
+            <span class="quote-num">01</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">别人如何看待你，那是别人的课题，你根本无法左右。</p>
+            <span class="quote-num">02</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">课题分离不是为了疏远他人，而是为了解开错综复杂的人际关系之线。</p>
+            <span class="quote-num">03</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">你不是为了满足他人的期待而活，他人也不是为了满足你的期待而活。</p>
+            <span class="quote-num">04</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 视差横幅 1：自由与勇气的开篇金句 ==================== -->
+  <section class="banner parallax banner-freedom">
+    <div class="container">
+      <p class="banner-quote serif fade-in-up">「自由就是被别人讨厌。不畏惧被人讨厌而是勇往直前，不随波逐流，这才是自由。」</p>
+      <p class="banner-source fade-in-up">——《被讨厌的勇气》</p>
+    </div>
+  </section>
+
+  <!-- ==================== 板块2：自由与勇气 ==================== -->
+  <section id="section3" class="quote-section alt">
+    <div class="container">
+      <div class="section-head fade-in-up">
+        <h2 class="section-title serif">自由与勇气</h2>
+        <p class="section-subtitle">Freedom &amp; Courage</p>
+        <div class="section-divider"></div>
+        <p class="section-intro">真正的自由，需要承担被讨厌的可能。不活在别人的期待里，也不要求别人活在自己的期待里。</p>
+      </div>
+
+      <div class="row quote-row">
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">自由就是被别人讨厌。不畏惧被人讨厌而是勇往直前，不随波逐流，这才是自由。</p>
+            <span class="quote-num">01</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">所谓勇气，就是勇于接受被讨厌。</p>
+            <span class="quote-num">02</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">倘若自己都不为自己活出自己的人生，那还有谁会为自己而活？</p>
+            <span class="quote-num">03</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">不要去追一匹马，用追马的时间种草，待到春暖花开时，就会有一批骏马任你挑选。</p>
+            <span class="quote-num">04</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 视差横幅 2：共同体感觉的开篇金句 ==================== -->
+  <section class="banner parallax banner-community">
+    <div class="container">
+      <p class="banner-quote serif fade-in-up">「把他人看作伙伴，而不是敌人。」</p>
+      <p class="banner-source fade-in-up">——《被讨厌的勇气》</p>
+    </div>
+  </section>
+
+  <!-- ==================== 板块3：共同体感觉 ==================== -->
+  <section id="section4" class="quote-section">
+    <div class="container">
+      <div class="section-head fade-in-up">
+        <h2 class="section-title serif">共同体感觉</h2>
+        <p class="section-subtitle">Community Feeling</p>
+        <div class="section-divider"></div>
+        <p class="section-intro">在共同体中找到自己的位置，把他人看作伙伴，在贡献中获得价值感与幸福。</p>
+      </div>
+
+      <div class="row quote-row">
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">把他人看作伙伴而不是敌人。</p>
+            <span class="quote-num">01</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">横向关系：虽有不同，但平等。拒绝赏罚，不评价他人。</p>
+            <span class="quote-num">02</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">贡献感，是幸福的来源。幸福即贡献感。</p>
+            <span class="quote-num">03</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="quote-card fade-in-up">
+            <span class="quote-mark serif">「</span>
+            <p class="quote-text serif">我们无法改变客观事实，但可以任意改变主观解释。</p>
+            <span class="quote-num">04</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 页脚 ==================== -->
+  <footer class="footer">
+    <p class="footer-quote-source serif">语录出自《被讨厌的勇气》岸见一郎、古贺史健</p>
+    <p class="footer-meta">© 2026 · 页面基于 Templatemo Conquer 模板改编 · 图片来自 Unsplash · 仅供学习交流</p>
+  </footer>
+
+  <!-- ==================== 脚本（CDN） ==================== -->
+  <!-- jQuery（Bootstrap 3 依赖） -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <!-- Bootstrap 3 JS（折叠菜单等组件） -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"></script>
+
+  <script>
+    $(function () {
+      'use strict';
+
+      var $window = $(window);
+      var $navbar = $('#mainNav');
+      var ticking = false;   // requestAnimationFrame 节流标记
+
+      /* ---------- 1. 导航栏透明度变化：滚动超过 40px 后加深底色 ---------- */
+      function updateNavbar() {
+        $navbar.toggleClass('scrolled', $window.scrollTop() > 40);
+      }
+
+      /* ---------- 2. 页面内平滑滚动（点击任意锚点链接） ---------- */
+      $('a[href^="#"]').on('click', function (e) {
+        var $target = $(this.hash);
+        if ($target.length) {
+          e.preventDefault();
+          $('html, body').stop(true, true).animate({
+            scrollTop: $target.offset().top
+          }, 700, 'swing');
+          // 移动端：点击后自动收起折叠菜单
+          $('.navbar-collapse').collapse('hide');
+        }
+      });
+
+      /* ---------- 3. 滚动监听：导航高亮 + 元素淡入 ---------- */
+      var sectionIds = ['section1', 'section2', 'section3', 'section4'];
+
+      /* 3-a. 根据当前位置高亮对应导航项 */
+      function updateActiveNav() {
+        var pos = $window.scrollTop() + 120;
+        var currentId = 'section1';
+        $.each(sectionIds, function (i, id) {
+          if ($('#' + id).offset().top <= pos) {
+            currentId = id;
+          }
+        });
+        $('#mainNav .nav li').removeClass('active')
+          .filter('[data-nav="' + currentId + '"]').addClass('active');
+      }
+
+      /* 3-b. 元素进入视口时淡入（.fade-in-up -> .visible） */
+      function revealOnScroll() {
+        var winBottom = $window.scrollTop() + $window.height();
+        $('.fade-in-up:not(.visible)').each(function () {
+          if ($(this).offset().top + 60 < winBottom) {
+            $(this).addClass('visible');
+          }
+        });
+      }
+
+      function onScroll() {
+        updateNavbar();
+        updateActiveNav();
+        revealOnScroll();
+        ticking = false;
+      }
+
+      $window.on('scroll', function () {
+        if (!ticking) {
+          window.requestAnimationFrame(onScroll);
+          ticking = true;
+        }
+      });
+
+      /* ---------- 初始化 ---------- */
+      updateNavbar();
+      updateActiveNav();
+      revealOnScroll();
+    });
+  </script>
+</body>
+</html>
